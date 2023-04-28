@@ -8,6 +8,8 @@ memcount = number of objects in the folder with excel files;
 
 Remember when you read excel file into sas -> there is a difference between excel name file and spreadsheet name.
 As an input in libname user defines excel name, but in the input library user will see as table names excel spreadsheet names
+
+Author: Wiktor Byrda
 */
 
 %let _dir = /opt/sas/repos/mp0003/USERS/MO09SN/DATA/EXCEL;
