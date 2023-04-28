@@ -13,9 +13,9 @@ Author: Wiktor Byrda
 viktar.byrda@gmail.com
 */
 
-%let _dir = /opt/sas/repos/mp0003/USERS/MO09SN/DATA/EXCEL;
-%let _libin = DATA_IN;
-%let _libout = CASUSER;
+%let _dir = ;
+%let _libin = ;
+%let _libout = ;
 
 %macro _read_excel_into_cas();
 
