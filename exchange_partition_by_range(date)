@@ -8,6 +8,9 @@ _data_exch - table with data to be appended to  table for partition exchange
 _sqlldr_path. - specify path to sqlldr client
 part_name - partition name
 part_value - partitin value
+
+Author: Wiktor Byrda
+viktar.byrda@gmail.com
 */
 
 /* Example of a table creation partitioned by range */
