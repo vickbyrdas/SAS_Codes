@@ -44,11 +44,11 @@ viktar.byrda@gmail.com
 		%do j=1 %to %sysfunc(countw(&_tables));
 		%let _next_table = %scan(&_tables, &j);
 
-		PROC CASUTIL;
-		LOAD DATA=&_libin..&_next_table.
-		CASOUT="&_next_table."
-		OUTCASLIB="&_libout."
-		REPLACE
+		proc casutil;
+		load data=&_libin..&_next_table.
+		casout="&_next_table."
+		outcaslib="&_libout."
+		replace
 		;
 		run;
 		%end;
