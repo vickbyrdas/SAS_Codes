@@ -1,0 +1,92 @@
+/*
+_ORALIB - oracle library;
+_ora_table_name - partitioned oracle output table name
+_ora_table_for_exch_name - table for partition exchange
+_authdomain - authdomain
+_orapath - orapath
+_data_exch - table with data to be appended to  table for partition exchange
+_sqlldr_path. - specify path to sqlldr client
+part_name - partition name
+part_value - partitin value
+*/
+
+/* Example of a table creation partitioned by range */
+proc sql;
+ %if %sysfunc(exist( &_ORALIB..&_ora_table_name. )) %then %do;
+	DROP TABLE  &_ORALIB..&_ora_table_name. ;
+ %end;
+   connect to oracle (authdomain=%str(%'&_AUTHDOMAIN.%') path=%str(%'&_ORApath.%'));
+	execute(
+create table &_ora_table_name.
+
+(REPORTING_DATE DATE,
+MODEL VARCHAR2(8))
+ partition by range(REPORTING_DATE)
+ ( partition P2022_01 values less than (TO_DATE('01FEB2022 00:00:00','DDMONYYYY:HH24:MI:SS','NLS_DATE_LANGUAGE=American'))
+)
+)
+by oracle;
+disconnect from oracle;
+quit;
+
+/* create table for exchange - has to be exact copy of oracle table*/
+%MACRO create_table_for_exchange(_oralib=, _ora_table_name=, _ora_table_for_exch_name=, _authdomain=, _orapath=);
+
+proc sql;
+ %if %sysfunc(exist(  &_ORALIB..&_ora_table_for_exch_name. )) %then %do;
+	DROP TABLE   &_ORALIB..&_ora_table_for_exch_name. ;
+ %end;
+connect to oracle (authdomain=%str(%'&_AUTHDOMAIN.%') path=%str(%'&_ORApath.%'));
+execute(
+create table &_ora_table_for_exch_name.
+for exchange with table &_ora_table_name.
+)
+by oracle;
+disconnect from oracle;
+quit;
+%MEND;
+
+/* appending table for exchange partition */
+%MACRO append_table_to_exchange(_oralib=, _data_exch=, _ora_table_for_exch_name= );
+proc append base=&_ORALIB..&_ora_table_for_exch_name.
+(
+BULKLOAD=YES
+BL_OPTIONS='PARALLEL=TURE'
+BL_SQLLDR_PATH='&_sqlldr_path.'
+)
+data=&_data_exch.;
+run;
+%mend;
+
+/* ADD PARTITION IF NOT EXIST AND EXCHANGE*/
+%MACRO exchange_part(_ora_table_name= ,_ora_table_for_exch_name= ,_AUTHDOMAIN = ,_ORApath = );
+proc sql;
+   connect to oracle (authdomain=%str(%'&_AUTHDOMAIN.%') path=%str(%'&_ORApath.%'));
+	execute(
+declare v_partition_count number;
+table_name string(30);
+begin
+select %str(%'&_ora_table_name.%') into table_name from dual;
+select count(*) into v_partition_count  from user_tab_partitions 
+where table_name = %str(%'&_ora_table_name.%')
+and partition_name = %str(%'&part_name.%');
+
+if v_partition_count = 0 then
+execute immediate 'alter table ' ||table_name|| '  ADD PARTITION '||' '||%str(%'&part_name.%')|| ' ' ||' values less than (TO_DATE('%str(%'&part_value.%')',''DDMONYYYY:HH24:MI:SS''))';
+
+end if;
+end;
+)
+by oracle;
+disconnect from oracle;
+quit;
+
+/* exchange partition */
+proc sql;
+connect to oracle (authdomain=%str(%'&_AUTHDOMAIN.%') path=%str(%'&_ORApath.%'));
+execute (alter table &_ora_table_name.
+exchange partition &part_name.
+with table &_ora_table_for_exch_name.) by oracle;
+disconnect from oracle;
+quit;
+%MEND;
