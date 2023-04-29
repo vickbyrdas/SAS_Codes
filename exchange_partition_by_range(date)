@@ -5,9 +5,11 @@ _ora_table_for_exch_name - table for partition exchange
 _authdomain - authdomain
 _orapath - orapath
 _data_exch - table with data to be appended to  table for partition exchange
-_sqlldr_path. - specify path to sqlldr client
+_sqlldr_path - specify path to sqlldr client
+_table - table for generating partition name and partition value 
 part_name - partition name
 part_value - partitin value
+
 
 Author: Wiktor Byrda
 viktar.byrda@gmail.com
@@ -83,6 +85,14 @@ end;
 by oracle;
 disconnect from oracle;
 quit;
+
+/* generate partition name */
+data _null_;
+set &_table.;
+call symputx('part_name', cats("P",put(year(datepart(reporting_date)),z4.),"_",put(month(datepart(reporting_date)),z2.)));
+call symputx('part_value', cat(put(intnx('day', datepart(REPORTING_DATE), 1),date9.), " 00:00:00"));
+run;
+%put &part_name. &part_value.;
 
 /* exchange partition */
 proc sql;
