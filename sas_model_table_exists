@@ -1,0 +1,27 @@
+/*
+Important: Please consider this code as a benchmark. It perfectly works in my machine for my purposes. But maybe has to be updated for your needs. Thanks. Do not hesitate to contact me.
+
+Code before macro call checks whether sas_model_table  has global scope or not 
+
+Author: Wiktor Byrda
+viktar.byrda@gmail.com
+*/
+
+proc cas;
+table.tableExists result=r/       
+caslib="&_caslib.", name="SAS_MODEL_TABLE";
+
+call symputx("table_exists", r.exists, 'G');
+%put 0 means sas_model_table does not exists in global environment and can be promoted, 2 means sas_model_table has global scope;
+
+quit;
+
+%if &table_exists.=0 %then %do;
+proc casutil incaslib="&_caslib." outcaslib="&_caslib." ;
+load casdata='sas_model_table.sashdat' 
+casout="sas_model_table"  promote;
+quit;
+%end;
+%else %do;
+%put &table_exists.;
+%end;
