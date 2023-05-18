@@ -1,4 +1,5 @@
 /*
+Important: Please consider this code as a benchmark. It perfectly works in my machine for my purposes. But maybe has to be updated for your needs. Thanks. Do not hesitate to contact me.
 _ORALIB - oracle library;
 _ora_table_name - partitioned oracle output table name
 _ora_table_for_exch_name - table for partition exchange
