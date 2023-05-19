@@ -1,0 +1,21 @@
+/*
+Important: Please consider this code as a benchmark. It perfectly works in my machine for my purposes. But maybe has to be updated for your needs. Thanks. Do not hesitate to contact me.
+
+Macro assign new caslib named myCaslib. Check before if exists.
+
+Author: Wiktor Byrda
+email:  viktar.byrda@gmail.com
+*/
+
+/*Assign CAS library*/
+%macro assign;
+%if %sysfunc(clibexist(sess,myCaslib)) %then %do;
+%return;
+%end;
+%else %do;;
+caslib myCaslib datasource=(srctype="path") path="/filePath/" sessref=sess subdirs;
+libname myCaslib cas;
+%end;
+%mend;
+
+%assign;
